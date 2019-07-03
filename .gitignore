@@ -3,6 +3,10 @@
 /rps-kit
 /pickles
 /temp
+*.fa
+*.fsa
+*.fas
+*.fasta
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
