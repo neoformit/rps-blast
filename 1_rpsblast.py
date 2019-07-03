@@ -8,9 +8,10 @@ import time
 import math
 import psutil
 import datetime
+import subprocess
 from fasta import fasta_read, fasta_write
 
-Class TimeMe(self):
+class TimeMe:
     """ Times a process and prints out a time/resource report.
     Takes the keyword error which will be printed in output if truthy. """
     def __init__(self, fname):
@@ -18,7 +19,7 @@ Class TimeMe(self):
         self.fname = fname
         print('\n\n\n')
         print('=============================================================\n')
-        print('Processing file %s...\n')
+        print('Running RPS-BLAST on %s...\n' % fname)
         print('-------------------------------------------------------------\n')
 
     def end(self, error=False):
@@ -60,7 +61,7 @@ def fasta_chunks(fname, chunk_size=5000):
         else:
             # Else take all elements
             chunk = fas
-        fasta_write(chunk,"temp/chunk_%s" % i)
+        fasta_write(chunk,"temp/chunk_%s.fas" % i)
         print("Chunk %s written to /temp" % i)
 
 
@@ -74,23 +75,24 @@ def rpsblast_chunks():
     re-chunked and run again. """
     chunk_files = os.listdir('temp')
     for fname in chunk_files:
+        fpath = 'temp/' + fname
         outfile = 'rps_xml/' + fname.replace('.fasta','.xml')
         t = TimeMe(fname)
 
         args = [
                 "./rps-kit/rpsblast",
-                "-query", fname,
+                "-query", fpath,
                 "-evalue", "0.01",
                 "-seg", "no",
-                "-outfmt", 5,
-                "-db", "db/Cdd",
+                "-outfmt", '5',
+                "-db", "rps-kit/db/Cdd",
                 "-out", outfile
         ]
 
         rps = subprocess.run(args, stderr=subprocess.PIPE)
-        t.end(rps)
+        t.end(rps.returncode)
 
-        if not rps:
+        if not rps.returncode:
             # Make sure python has finished closing to avoid PermissionError
             time.sleep(2)
             try:
@@ -102,7 +104,7 @@ def rpsblast_chunks():
 
 if __name__ == '__main__':
 
-    fas = input('Enter name of fasta file: ')
-    if fas:
+    fname = input('Enter name of fasta file: ')
+    if fname:
         fasta_chunks(fname)
         rpsblast_chunks()
