@@ -103,5 +103,6 @@ def rpsblast_chunks():
 if __name__ == '__main__':
 
     fas = input('Enter name of fasta file: ')
-    fasta_chunks(fname)
-    rpsblast_chunks()
+    if fas:
+        fasta_chunks(fname)
+        rpsblast_chunks()
