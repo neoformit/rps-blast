@@ -2,6 +2,7 @@
 /rps_xml
 /rps-kit
 /pickles
+/temp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
