@@ -1,6 +1,5 @@
-# Maybe try threading to see if speeds up?
-# Bite 2000 seq chunks out of proteome and save as temp(x).fa
-# Make call to rpsblast through batch file
+# Bite 5000 seq chunks out of proteome and save as chunk(x).fas
+# Make calls to rpsblast
 # Iterate through chunks, logging time.
 
 import os
@@ -12,15 +11,22 @@ import subprocess
 from fasta import fasta_read, fasta_write
 
 class TimeMe:
+
     """ Times a process and prints out a time/resource report.
     Takes the keyword error which will be printed in output if truthy. """
+
     def __init__(self, fname):
+
+        self.LOGFILE = 'rps.log'
+
         self.t0 = time.time()
         self.fname = fname
-        print('\n\n\n')
-        print('=============================================================\n')
-        print('Running RPS-BLAST on %s...\n' % fname)
-        print('-------------------------------------------------------------\n')
+        t = format(datetime.datetime.now(), "%H:%M:%S")
+        self.log('\n\n\n')
+        self.log(t)
+        self.log('=============================================================\n')
+        self.log('Running RPS-BLAST on %s...\n' % fname)
+        self.log('-------------------------------------------------------------\n')
 
     def end(self, error=False):
         td = self.HMS(time.time() - self.t0)
@@ -29,23 +35,27 @@ class TimeMe:
         ram = str(mem.percent) + '%'
         cpu = str(psutil.cpu_percent()) + '%'
         if error:
-            print('Chunk %s failed after %s Hrs' % (self.fname, td))
-            print('\nCPU: %s    RAM: %s' % (cpu, ram))
-            print('Error message:\n%s' % error)
+            self.log('Chunk %s failed after %s Hrs' % (self.fname, td))
+            self.log('\nCPU: %s    RAM: %s' % (cpu, ram))
+            self.log('Error message:\n%s' % error)
         else:
-            print('Chunk %s processed in %s Hrs' % (fname, td))
-            print('\nCPU: %s    RAM: %s' % (cpu, ram))
-        print('=============================================================\n')
+            self.log('Chunk %s processed in %s Hrs' % (self.fname, td))
+            self.log('\nCPU: %s    RAM: %s' % (cpu, ram))
+        self.log('=============================================================\n')
 
     def HMS(self,ts):
         sec = round(ts,2)
-        tStr = str(datetime.timedelta(seconds=sec))
-        if '.' in tStr:
-            t = tStr.split('.')
-            tStr = t[0] + '.' + t[1][:2]
-            return tStr
-        else:
-            return tStr
+        return format(datetime.timedelta(seconds=sec),"%H:%M:%S")
+    
+    def log(self,msg):
+        with open(self.LOGFILE, 'a+') as f:
+            f.write('\n' + msg)
+
+
+def log(msg):
+    LOGFILE = 'rps.log'
+    with open(LOGFILE, 'a+') as f:
+        f.write('\n' + msg)
 
 
 def fasta_chunks(fname, chunk_size=5000):
@@ -55,14 +65,15 @@ def fasta_chunks(fname, chunk_size=5000):
     # Iterate over chunk numbers
     for i in range(no_chunks):
         i+=1
-        if len(fas) >= chunk_size:
+        if len(fas) > chunk_size:
             # Take first 5k elements
             chunk = dict(list(fas.items())[:chunk_size])
+            fas = dict(list(fas.items())[chunk_size:])
         else:
             # Else take all elements
             chunk = fas
         fasta_write(chunk,"temp/chunk_%s.fas" % i)
-        print("Chunk %s written to /temp" % i)
+        self.log("Chunk %s written to /temp" % i)
 
 
 # Run chunks
@@ -74,9 +85,10 @@ def rpsblast_chunks():
     successful the chunkfile is removed. Otherwise file will remain to be
     re-chunked and run again. """
     chunk_files = os.listdir('temp')
+    chunk_files.sort()
     for fname in chunk_files:
         fpath = 'temp/' + fname
-        outfile = 'rps_xml/' + fname.replace('.fasta','.xml')
+        outfile = 'rps_xml/' + fname.replace('.fas','.xml')
         t = TimeMe(fname)
 
         args = [
@@ -96,7 +108,7 @@ def rpsblast_chunks():
             # Make sure python has finished closing to avoid PermissionError
             time.sleep(2)
             try:
-                os.remove(fname)
+                os.remove(fpath)
             except PermissionError:
                 print('!!! PermissionError removing %s' % fname)
 
@@ -104,7 +116,6 @@ def rpsblast_chunks():
 
 if __name__ == '__main__':
 
-    fname = input('Enter name of fasta file: ')
+    fname = 'TRL.fa'
     if fname:
-        fasta_chunks(fname)
         rpsblast_chunks()
