@@ -42,7 +42,7 @@ class TimeMe:
 
     def HMS(self,ts):
         sec = round(ts,2)
-        return format(datetime.timedelta(seconds=sec),"%H:%M:%S")
+        return str(datetime.timedelta(seconds=sec))
 
     def log(self,msg, error=False):
         with open(self.LOGFILE, 'a+') as f:
@@ -91,7 +91,7 @@ def rpsblast_chunks():
 
     for fname in chunk_files:
         fpath = 'temp/' + fname
-        outfile = 'rps_xml/' + fname.replace('.fas','.xml')
+        outfile = 'xml/' + fname.replace('.fas','.xml')
         t = TimeMe(fname)
 
         args = [
