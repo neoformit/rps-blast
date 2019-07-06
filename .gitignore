@@ -3,6 +3,7 @@
 /xml
 /out
 /temp
+/csv
 *.fa
 *.fsa
 *.fas
