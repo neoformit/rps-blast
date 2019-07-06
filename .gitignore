@@ -1,7 +1,8 @@
 # Specific
-/rps_xml
 /rps-kit
-/pickles
+/xml
+/out
+/csv
 /temp
 *.fa
 *.fsa

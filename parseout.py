@@ -34,7 +34,7 @@ def parse():
                 if line[0] == '1':
                     if query not in cdData.keys():
                         cdData[query] = []
-                    domain = line[9]
+                    domain = line[9].split(',')[0]
                     start = line[4]
                     stop = line[5]
                     e = line[6]
@@ -51,8 +51,9 @@ def parse():
                 ]) + '\n'
         )
 
-        for key, val in cdData.items():
-            w.write(",".join([key] + val) + '\n')
+        for key, doms in cdData.items():
+            for d in doms:
+                w.write(",".join([key] + d) + '\n')
 
         r.close()
         w.close()
@@ -66,19 +67,19 @@ def combine(exp_id, chunk_num):
     """ Combine all csvs into one. """
 
     # Check final csv count matches original chunk count (avoid oopsies...)
-    assert chunk_num == os.listdir(csv)
-
     csvs = os.listdir('csv')
+    assert chunk_num == len(csvs), "Final chunk number does not equal initial"
     cols = ['contig_id','name','start','stop',
             'evalue','bitscore','truncated','accession']
     dfm = pd.DataFrame(columns=cols)
 
     for c in csvs:
+        print('Reading in %s' % c)
         cpath = 'csv/' + c
         df = pd.read_csv(cpath)
         dfm.append(df)
         try:
-            os.remove(cpath)
+            print('written successfully') # os.remove(cpath)
         except PermissionError:
             log('!!! PermissionError removing %s' % c, error=True)
 
