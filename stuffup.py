@@ -3,6 +3,7 @@ import os
 csvs = os.listdir('csv')
 
 for csv in csvs:
+    csv = 'csv/' + csv
     new = open("1_%s" % csv,'w')
     with open(csv) as r:
         for line in r.read().splitlines():
