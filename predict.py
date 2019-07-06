@@ -6,8 +6,8 @@ from parseout import parse, combine
 def domains(exp_id):
     """ Runs rps-blast over a whole proteome by iterating over chunks.
     Formats the output using rpsbproc and then parses the output into a
-    single csv file ready for data import. Should take about 36 hours on
-    a single core, 9 hours on a 4-core. Expects a proteome file.fa to
+    single csv file ready for data import. Should process approximately
+    15k sequences per core per hour. Expects a proteome <exp_id>.fa to
     be present in the rps-blast directory. """
 
     fname = exp_id + '.fa'
