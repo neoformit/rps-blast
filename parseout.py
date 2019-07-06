@@ -77,7 +77,7 @@ def combine(exp_id, chunk_num):
         print('Reading in %s' % c)
         cpath = 'csv/' + c
         df = pd.read_csv(cpath)
-        dfm.append(df)
+        dfm = dfm.append(df)
         try:
             print('written successfully') # os.remove(cpath)
         except PermissionError:
@@ -86,3 +86,4 @@ def combine(exp_id, chunk_num):
 
     fname = exp_id + '.csv'
     dfm.to_csv(fname, index=False)
+    return locals()
