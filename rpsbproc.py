@@ -1,13 +1,15 @@
 import os
 import time
 import subprocess
-from rpsblast import TimeMe, log
+from .rpsblast import TimeMe, log
 
 def rpsbproc():
-    xmls = os.listdir('rps_xml')
+    xmls = os.listdir('xml')
+    i=0
 
     for xml in xmls:
-        t = TimeMe(xml, process="rpsbproc")
+        i+=1
+        t = TimeMe(xml, process="rpsbproc",i=i,chunk_num=len(xmls))
         fpath = 'xml/' + xml
         out = 'out/' + xml.replace('.xml','.out')
         args = [

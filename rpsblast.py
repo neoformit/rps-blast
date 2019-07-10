@@ -11,17 +11,20 @@ class TimeMe:
     """ Times a process and prints out a time/resource report.
     Takes kwarg 'error' which is logged if truthy. """
 
-    def __init__(self, fname, process='RPS-BLAST'):
+    def __init__(self, fname, process='RPS-BLAST', i=None, chunk_num=None):
 
         self.LOGFILE = 'rps.log'
 
         self.t0 = time.time()
         self.fname = fname
         t = format(datetime.datetime.now(), "%H:%M:%S")
+        current = ""
+        if i:
+            current = "(%s/%s)" % (i,chunk_num)
         self.log('\n\n\n')
         self.log(t)
         self.log('=============================================================\n')
-        self.log('Running %s on %s...\n' % (process,fname))
+        self.log('Running %s on %s %s\n' % (process,fname,current))
         self.log('-------------------------------------------------------------\n')
 
     def end(self, error=False):
@@ -31,17 +34,17 @@ class TimeMe:
         ram = str(mem.percent) + '%'
         cpu = str(psutil.cpu_percent()) + '%'
         if error:
-            self.log('Chunk %s failed after %s Hrs' %
+            self.log('%s failed after %s Hrs' %
                     (self.fname, td), error=True)
             self.log('\nCPU: %s    RAM: %s' % (cpu, ram), error=True)
             self.log('Error message:\n%s' % error, error=True)
         else:
-            self.log('Chunk %s processed in %s Hrs' % (self.fname, td))
+            self.log('%s processed in %s Hrs' % (self.fname, td))
             self.log('\nCPU: %s    RAM: %s' % (cpu, ram))
         self.log('=============================================================\n')
 
     def HMS(self,ts):
-        sec = round(ts,2)
+        sec = round(ts)
         return str(datetime.timedelta(seconds=sec))
 
     def log(self,msg, error=False):
@@ -77,7 +80,7 @@ def fasta_chunks(fname, chunk_size=5000):
             # Else take all elements
             chunk = fas
         fasta_write(chunk,"temp/chunk_%s.fas" % i)
-        self.log("Chunk %s written to /temp" % i)
+        log("%s written to /temp" % i)
 
     return chunk_num
 
@@ -88,11 +91,13 @@ def rpsblast_chunks():
     re-chunked and run again. """
     chunk_files = os.listdir('temp')
     chunk_files.sort()
+    i=0
 
     for fname in chunk_files:
+        i+=1
         fpath = 'temp/' + fname
         outfile = 'xml/' + fname.replace('.fas','.xml')
-        t = TimeMe(fname)
+        t = TimeMe(fname,i=i,chunk_num=len(chunk_files))
 
         args = [
                 "./rps-kit/rpsblast",

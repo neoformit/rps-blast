@@ -1,9 +1,13 @@
 import os
 import pandas as pd
-from rpsblast import log
+from .rpsblast import log
 
 def parse():
     """ Parse rpsbproc outfile to csv """
+
+    with open('rps.log','a+') as l:
+        l.write('\n\nParsing to csv format...')
+
     outfiles = os.listdir('out')
 
     for fname in outfiles:
@@ -66,6 +70,9 @@ def parse():
 def combine(exp_id, chunk_num):
     """ Combine all csvs into one. """
 
+    with open('rps.log','a+') as l:
+        l.write('\n\nMerging csv files...')
+
     # Check final csv count matches original chunk count (avoid oopsies...)
     csvs = os.listdir('csv')
     assert chunk_num == len(csvs), "Final chunk number does not equal initial"
@@ -77,7 +84,7 @@ def combine(exp_id, chunk_num):
         print('Reading in %s' % c)
         cpath = 'csv/' + c
         df = pd.read_csv(cpath)
-        dfm.append(df)
+        dfm = dfm.append(df)
         try:
             print('written successfully') # os.remove(cpath)
         except PermissionError:
