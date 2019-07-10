@@ -2,8 +2,8 @@
 /rps-kit
 /xml
 /out
-/csv
 /temp
+/csv
 *.fa
 *.fsa
 *.fas

@@ -93,3 +93,4 @@ def combine(exp_id, chunk_num):
 
     fname = exp_id + '.csv'
     dfm.to_csv(fname, index=False)
+    return locals()
